@@ -2,63 +2,44 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.*;
 
 public class Client {
     //client to connect to server port 10008
     public static void clientProcess() throws IOException {
-        //ACK counter
-        int ackCounter = 0;
-        Socket clientSocket = null;
-        try {
-            clientSocket = new Socket("localhost", 10008);
-        } catch (UnknownHostException e) {
-            System.err.println("Don't know about host: localhost.");
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to: localhost.");
-            System.exit(1);
+        //udp client in loop
+        DatagramSocket clientSocket = new DatagramSocket();
+        InetAddress IPAddress = InetAddress.getByName("localhost");
+        byte[] sendData = new byte[1024];
+        byte[] receiveData = new byte[1024];
+        while(true) {
+            BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
+            String sentence = inFromUser.readLine();
+            sendData = garble(sentence).getBytes();
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876);
+            clientSocket.send(sendPacket);
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            clientSocket.receive(receivePacket);
+            String modifiedSentence = new String(receivePacket.getData());
+            System.out.println("FROM SERVER:" + modifiedSentence);
         }
-        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(clientSocket.getInputStream()));
-        BufferedReader stdIn = new BufferedReader(
-                new InputStreamReader(System.in));
-        String userInput;
-
-        while ((userInput = stdIn.readLine()) != null) {
-
-            System.out.println("Client: " + userInput);
-            out.println(garble(send(userInput) + "-" + ackCounter));
-            //increment ACK counter
-            ackCounter++;
-            //randomly do not send message
-           /* if (Math.random() < 0.5) {
-                System.out.println("Client: " + userInput);
-                out.println(garble(send(userInput)));
-            }
-            else {
-                System.out.println("Client: " + userInput + " (not sent)");
-                continue;
-
-            }*/
 
 
 
 
 
-            System.out.println("Client Send: " + userInput);
-            System.out.println("Server Response: " + in.readLine());
-            if (userInput.equals("Bye."))
-                break;
 
+    }
 
+    //create a message garbled by a random number of random characters
+    public static String garbleMessage(String message) {
+        String garbledMessage = "";
+        int randomNum = (int) (Math.random() * 10);
+        for (int i = 0; i < randomNum; i++) {
+            garbledMessage += (char) (Math.random() * 256);
         }
-        out.close();
-        in.close();
-        stdIn.close();
-        clientSocket.close();
+        garbledMessage += message;
+        return garbledMessage;
     }
 
     //create message garbled by random bit error

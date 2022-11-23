@@ -1,6 +1,5 @@
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 
 public class Server {
     /* The point-to-point links specified at the ITC script will be emulated by passing UDP/IP messages
@@ -9,38 +8,23 @@ public class Server {
      sent to node-2 through its UDP socket as defined in the ITC script. A very basic implementation
      of a “UDP Sender Receiver” emulated link in Java will be provided by us for reference.*/
     public static void serverProcess() throws IOException {
-        ServerSocket serverSocket = null;
-        try {
-            System.out.println("Server is running...");
-            serverSocket = new ServerSocket(10008);
-        } catch (IOException e) {
-            System.err.println("Could not listen on port: 10008.");
-            System.exit(1);
+        DatagramSocket serverSocket = new DatagramSocket(9876);
+        byte[] receiveData = new byte[1024];
+        byte[] sendData = new byte[1024];
+        while(true)
+        {
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            serverSocket.receive(receivePacket);
+            String sentence = new String( receivePacket.getData());
+            System.out.println("RECEIVED: " + sentence);
+            InetAddress IPAddress = receivePacket.getAddress();
+            int port = receivePacket.getPort();
+            String capitalizedSentence = sentence.toUpperCase();
+            sendData = capitalizedSentence.getBytes();
+            DatagramPacket sendPacket =
+                    new DatagramPacket(sendData, sendData.length, IPAddress, port);
+            serverSocket.send(sendPacket);
         }
-        Socket clientSocket = null;
-        try {
-            clientSocket = serverSocket.accept();
-        } catch (IOException e) {
-            System.err.println("Accept failed.");
-            System.exit(1);
-        }
-        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                        clientSocket.getInputStream()));
-
-        String inputLine, outputLine;
-        while ((inputLine = in.readLine()) != null) {
-            System.out.println("Server: " + inputLine);
-            outputLine = inputLine;
-            out.println(outputLine.split("-")[1]);
-            if (outputLine.equals("Bye."))
-                break;
-        }
-        out.close();
-        in.close();
-        clientSocket.close();
-        serverSocket.close();
     }
 
 
