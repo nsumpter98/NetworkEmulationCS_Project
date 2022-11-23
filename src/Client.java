@@ -7,6 +7,11 @@ import java.net.*;
 public class Client {
     //client to connect to server port 10008
     public static void clientProcess() throws IOException {
+
+        //ACK counter
+        int ackCounter = 0;
+
+
         //udp client in loop
         DatagramSocket clientSocket = new DatagramSocket();
         InetAddress IPAddress = InetAddress.getByName("localhost");
@@ -15,7 +20,9 @@ public class Client {
         while(true) {
             BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
             String sentence = inFromUser.readLine();
-            sendData = garble(sentence).getBytes();
+            //build sentence with ack counter
+            String sentenceWithAck = sentence + "~" + ackCounter;
+            sendData = garble(sentenceWithAck).getBytes();
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876);
             clientSocket.send(sendPacket);
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
@@ -31,16 +38,11 @@ public class Client {
 
     }
 
-    //create a message garbled by a random number of random characters
-    public static String garbleMessage(String message) {
-        String garbledMessage = "";
-        int randomNum = (int) (Math.random() * 10);
-        for (int i = 0; i < randomNum; i++) {
-            garbledMessage += (char) (Math.random() * 256);
-        }
-        garbledMessage += message;
-        return garbledMessage;
-    }
+
+
+
+
+
 
     //create message garbled by random bit error
     public static String garble(String message) {

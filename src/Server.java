@@ -16,10 +16,10 @@ public class Server {
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             serverSocket.receive(receivePacket);
             String sentence = new String( receivePacket.getData());
-            System.out.println("RECEIVED: " + sentence);
+            System.out.println("RECEIVED: " + sentence.split("~")[1]);
             InetAddress IPAddress = receivePacket.getAddress();
             int port = receivePacket.getPort();
-            String capitalizedSentence = sentence.toUpperCase();
+            String capitalizedSentence = sentence.split("~")[1];
             sendData = capitalizedSentence.getBytes();
             DatagramPacket sendPacket =
                     new DatagramPacket(sendData, sendData.length, IPAddress, port);
