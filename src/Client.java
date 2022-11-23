@@ -25,7 +25,24 @@ public class Client {
                 new InputStreamReader(System.in));
         String userInput;
         while ((userInput = stdIn.readLine()) != null) {
-            out.println(userInput);
+
+            System.out.println("Client: " + userInput);
+            out.println(garble(send(userInput)));
+            //randomly do not send message
+           /* if (Math.random() < 0.5) {
+                System.out.println("Client: " + userInput);
+                out.println(garble(send(userInput)));
+            }
+            else {
+                System.out.println("Client: " + userInput + " (not sent)");
+                continue;
+
+            }*/
+
+
+
+
+
             System.out.println("Client: " + userInput);
             System.out.println("Server: " + in.readLine());
             if (userInput.equals("Bye."))
@@ -36,4 +53,30 @@ public class Client {
         stdIn.close();
         clientSocket.close();
     }
+
+    //create message garbled by random bit error
+    public static String garble(String message) {
+        String garbledMessage = "";
+        for (int i = 0; i < message.length(); i++) {
+            if (Math.random() < 0.1) {
+                garbledMessage += (char) (message.charAt(i) + 1);
+            } else {
+                garbledMessage += message.charAt(i);
+            }
+        }
+        return garbledMessage;
+    }
+
+
+    //create send function that adds the checksum to the message
+    public static String send(String message) {
+        String checksum = "";
+        for (int i = 0; i < message.length(); i++) {
+            checksum += (char) (message.charAt(i) + 1);
+        }
+        return message + checksum;
+    }
+
+
+
 }
