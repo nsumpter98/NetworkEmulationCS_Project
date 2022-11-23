@@ -33,7 +33,7 @@ public class Server {
         while ((inputLine = in.readLine()) != null) {
             System.out.println("Server: " + inputLine);
             outputLine = inputLine;
-            out.println(outputLine);
+            out.println(outputLine.split("-")[1]);
             if (outputLine.equals("Bye."))
                 break;
         }

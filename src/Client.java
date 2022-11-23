@@ -8,6 +8,8 @@ import java.net.UnknownHostException;
 public class Client {
     //client to connect to server port 10008
     public static void clientProcess() throws IOException {
+        //ACK counter
+        int ackCounter = 0;
         Socket clientSocket = null;
         try {
             clientSocket = new Socket("localhost", 10008);
@@ -24,10 +26,13 @@ public class Client {
         BufferedReader stdIn = new BufferedReader(
                 new InputStreamReader(System.in));
         String userInput;
+
         while ((userInput = stdIn.readLine()) != null) {
 
             System.out.println("Client: " + userInput);
-            out.println(garble(send(userInput)));
+            out.println(garble(send(userInput) + "-" + ackCounter));
+            //increment ACK counter
+            ackCounter++;
             //randomly do not send message
            /* if (Math.random() < 0.5) {
                 System.out.println("Client: " + userInput);
@@ -43,10 +48,12 @@ public class Client {
 
 
 
-            System.out.println("Client: " + userInput);
-            System.out.println("Server: " + in.readLine());
+            System.out.println("Client Send: " + userInput);
+            System.out.println("Server Response: " + in.readLine());
             if (userInput.equals("Bye."))
                 break;
+
+
         }
         out.close();
         in.close();
